@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Provas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Estilo geral */
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #eef2f3;
+    color: #333;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.container, .login-container {
+    width: 50%;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    margin-top: 50px;
+}
+
+.login-container {
+    width: 30%;
+    margin-top: 100px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+}
+
+input, button {
+    padding: 10px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+input {
+    width: calc(25% - 15px);
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Tema escuro */
+body.dark-theme {
+    background-color: #363636;
+    color: #fff;
+}
+
+body.dark-theme .container, 
+body.dark-theme .login-container {
+    background-color: #1e1e1e;
+    color: #fff;
+}
+
+body.dark-theme button {
+    background-color: #007bff;
+    color: #fff;
+}
+
+body.dark-theme button:hover {
+    background-color: #0056b3;
+}
+
+body.dark-theme #toggle-theme {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.remove-btn {
+    background-color: #dc3545;
+}
+
+.remove-btn:hover {
+    background-color: #c82333;
+}
+
+.final-score {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* Estilo das abas */
+.tabs button {
+    margin: 10px;
+    padding: 12px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.tabs button:hover {
+    background-color: #218838;
+}
+
+.icon {
+    margin-right: 8px;
+}
+
+/* Botão para alternar o tema */
+#toggle-theme {
+    font-size: 24px;
+    padding: 10px;
+    background: #007bff;
+    color: white;
+    border-radius: 50%;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s ease-in-out;
+}
+
+#toggle-theme:hover {
+    background-color: #007bff;
+}
+
+/* Estilo para a imagem de perfil no canto superior direito */
+#perfil-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 200; /* Garantir que a imagem de perfil fique acima de outros elementos */
+}
+
+#perfil-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Estilo para o pop-up de informações do admin */
+.info-admin {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    width: 300px;
+    z-index: 100; /* Garantir que o pop-up esteja abaixo das abas */
+}
+
+/* Ajuste para as abas */
+.tabs button {
+    z-index: 200; /* Garantir que os botões das abas fiquem acima do pop-up */
+}
+
+/* Estilo para o conteúdo do pop-up */
+.info-content h3 {
+    margin-bottom: 10px;
+}
+
+.info-content p {
+    margin: 5px 0;
+}
+
+.info-content button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.info-content button:hover {
+    background-color: #0056b3;
+}
+
+    </style>
+</head>
+<body>
+    <div id="login" class="login-container">
+        <h2><i class="fas fa-sign-in-alt icon"></i>Login de Administrador</h2>
+        <input type="text" id="usuario" placeholder="Usuário">
+        <input type="password" id="senha" placeholder="Senha">
+        <button onclick="verificarLogin()"><i class="fas fa-user-check icon"></i>Entrar</button>
+    </div>
+
+    <div id="sistema" style="display: none;">
+        <div class="tabs">
+            <button onclick="trocarAba('jp')"><i class="fas fa-book icon"></i>Provas de Jp</button>
+            <button onclick="trocarAba('duda')"><i class="fas fa-book-open icon"></i>Provas de Duda</button>
+            <button onclick="trocarAba('melhorPior')"><i class="fas fa-trophy icon"></i>Melhor e Pior Matéria</button>
+        </div>
+        <div class="container" id="abaProvas">
+            <h2 id="titulo"><i class="fas fa-chalkboard-teacher icon"></i>Gerenciador de Provas - Jp</h2>
+            <input type="text" id="materia" placeholder="Matéria">
+            <input type="date" id="data">
+            <button onclick="adicionarProva()"><i class="fas fa-plus-circle icon"></i>Adicionar</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-book icon"></i>Matéria</th>
+                        <th><i class="fas fa-calendar-alt icon"></i>Data</th>
+                        <th><i class="fas fa-marker icon"></i>Trimestre 1</th>
+                        <th><i class="fas fa-marker icon"></i>Trimestre 2</th>
+                        <th><i class="fas fa-marker icon"></i>Trimestre 3</th>
+                        <th><i class="fas fa-calculator icon"></i>Média</th>
+                        <th><i class="fas fa-trash-alt icon"></i>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="listaProvas"></tbody>
+            </table>
+            <div class="final-score" id="notaFinal">Nota Final: 0</div>
+        </div>
+
+        <!-- Tabela de Ranking de Notas -->
+        <div class="container" id="abaRanking">
+            <h2><i class="fas fa-list-ol icon"></i>Matérias Status</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-book icon"></i>Matéria</th>
+                        <th><i class="fas fa-calculator icon"></i>Média</th>
+                        <th><i class="fas fa-star-half-alt icon"></i>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="rankingProvas"></tbody>
+            </table>
+        </div>
+
+        <!-- Tabela Melhor e Pior Matéria -->
+        <div class="container" id="abaMelhorPior" style="display: none;">
+            <h2><i class="fas fa-trophy icon"></i>Melhor e Pior Matéria</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-user icon"></i>Aluno</th>
+                        <th><i class="fas fa-book icon"></i>Melhor Matéria</th>
+                        <th><i class="fas fa-book icon"></i>Pior Matéria</th>
+                    </tr>
+                </thead>
+                <tbody id="melhorPiorTabela"></tbody>
+            </table>
+        </div>
+    </div>
+
+
+     <!-- Logo e Menu Superior -->
+     <div id="top-bar">
+        <div id="perfil-container">
+            <img id="perfil-img" src="https://www.example.com/imagem-de-perfil.jpg" alt="Imagem de Perfil" onclick="mostrarInfoAdmin()">
+        </div>
+    </div>
+
+    <!-- Pop-up com as informações do admin -->
+    <div id="info-admin" class="info-admin" style="display: none;">
+        <div class="info-content">
+            <h3>Informações do Administrador</h3>
+            <p><strong>Nome:</strong> Administrador</p>
+            <p><strong>Última vez que inseriu uma prova:</strong> <span id="ultimo-dia">10/02/2025 - 14:30</span></p>
+            <button onclick="fecharInfo()">Fechar</button>
+        </div>
+    </div>
+
+    <div id="sistema" style="display: none;">
+        <!-- O conteúdo do sistema continua aqui... -->
+    </div>
+
+
+
+
+           <!-- Botão de alternância de tema -->
+    <button id="toggle-theme" onclick="alternarTema()">🌙</button>
+
+    <script>
+ function mostrarInfoAdmin() {
+            document.getElementById("info-admin").style.display = "block";
+        }
+
+        // Função para fechar o painel de informações
+        function fecharInfo() {
+            document.getElementById("info-admin").style.display = "none";
+        }
+
+        const ADMIN_USER = "admin";
+        const ADMIN_PASS = "1234";
+    // Função de verificação de login
+    // Chamar a função ao fazer o login ou carregar a página
+function verificarLogin() {
+    const usuario = document.getElementById("usuario").value;
+    const senha = document.getElementById("senha").value;
+    if (usuario === ADMIN_USER && senha === ADMIN_PASS) {
+        localStorage.setItem("loggedIn", "true");
+        document.getElementById("login").style.display = "none";
+        document.getElementById("sistema").style.display = "block";
+        document.getElementById("perfil-img").style.display = "block";
+        carregarPerfil(); // Carregar as informações do perfil
+    } else {
+        alert("Usuário ou senha incorretos!");
+    }
+}
+
+// Função para carregar as informações do perfil
+function carregarPerfil() {
+    const nomeAdmin = localStorage.getItem("nomeAdmin") || "Administrador";
+    const fotoPerfil = localStorage.getItem("fotoPerfil") || "https://www.example.com/imagem-de-perfil.jpg";
+    const ultimoLogin = localStorage.getItem("ultimoLogin") || "Nunca";
+
+    // Atualizar os elementos com as informações
+    document.getElementById("perfil-img").src = fotoPerfil;
+    document.getElementById("info-admin").innerHTML = `
+        <h3>Informações do Administrador</h3>
+        <p><strong>Nome:</strong> ${nomeAdmin}</p>
+        <p><strong>Último Login:</strong> ${ultimoLogin}</p>
+        <button onclick="fecharInfo()">Fechar</button>
+    `;
+}
+    
+       
+        window.onload = function() {
+            verificarSessao();
+            carregarProvas();  // Garantir que as provas carreguem quando a página for recarregada
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                document.getElementById('toggle-theme').textContent = '🌞';
+            } else {
+                document.getElementById('toggle-theme').textContent = '🌙';
+            }
+        };
+    
+        // Função para alternar o tema
+        function alternarTema() {
+            const body = document.body;
+            const currentTheme = body.classList.contains('dark-theme') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+            body.classList.toggle('dark-theme', newTheme === 'dark');
+            document.getElementById('toggle-theme').textContent = newTheme === 'dark' ? '🌞' : '🌙';
+    
+            // Salvar a preferência do usuário no localStorage
+            localStorage.setItem('theme', newTheme);
+        }
+    
+        let usuarioAtual = 'jp';
+    
+        function trocarAba(usuario) {
+            usuarioAtual = usuario;
+           
+    
+            // Alternando as abas visíveis
+            if (usuario === 'melhorPior') {
+                document.getElementById("abaProvas").style.display = "none";
+                document.getElementById("abaRanking").style.display = "none";
+                document.getElementById("abaMelhorPior").style.display = "block";
+                mostrarMelhorPior();
+            } else {
+                document.getElementById("abaProvas").style.display = "block";
+                document.getElementById("abaRanking").style.display = "block";
+                document.getElementById("abaMelhorPior").style.display = "none";
+                carregarProvas();  // Forçar o carregamento das provas para a aba
+            }
+        }
+    
+        function carregarProvas() {
+            const provas = JSON.parse(localStorage.getItem("provas_" + usuarioAtual)) || [];
+            const lista = document.getElementById("listaProvas");
+            const ranking = document.getElementById("rankingProvas");
+            lista.innerHTML = "";
+            ranking.innerHTML = "";
+    
+            // Carregar as provas na tela
+            provas.forEach((prova, index) => {
+                lista.innerHTML += `<tr>
+                    <td>${prova.materia}</td>
+                    <td>${prova.data}</td>
+                    <td><input type="number" min="0" max="10" value="${prova.nota1 || ''}" onchange="atualizarNota(${index}, this.value, 1)"></td>
+                    <td><input type="number" min="0" max="10" value="${prova.nota2 || ''}" onchange="atualizarNota(${index}, this.value, 2)"></td>
+                    <td><input type="number" min="0" max="10" value="${prova.nota3 || ''}" onchange="atualizarNota(${index}, this.value, 3)"></td>
+                    <td>${calcularMedia(prova)}</td>
+                    <td><button class="remove-btn" onclick="removerProva(${index})"><i class="fas fa-trash-alt"></i> Remover</button></td>
+                </tr>`;
+            });
+    
+            // Atualizando o ranking
+            provas.forEach((prova) => {
+                const media = parseFloat(calcularMedia(prova));
+                ranking.innerHTML += `<tr>
+                    <td>${prova.materia}</td>
+                    <td>${media.toFixed(2)}</td>
+                    <td>${media < 7 ? "Recuperação" : "Aprovado(a)"}</td>
+                </tr>`;
+            });
+    
+            calcularNotaFinal();
+        }
+    
+        function adicionarProva() {
+            const materia = document.getElementById("materia").value;
+            const data = document.getElementById("data").value;
+            if (materia && data) {
+                const provas = JSON.parse(localStorage.getItem("provas_" + usuarioAtual)) || [];
+                provas.push({ materia, data, nota1: null, nota2: null, nota3: null });
+                localStorage.setItem("provas_" + usuarioAtual, JSON.stringify(provas));
+                carregarProvas();  // Carregar as provas imediatamente após adicionar
+            }
+        }
+    
+        function atualizarNota(index, nota, trimestre) {
+            const provas = JSON.parse(localStorage.getItem("provas_" + usuarioAtual));
+            provas[index][`nota${trimestre}`] = parseFloat(nota) || 0;
+            localStorage.setItem("provas_" + usuarioAtual, JSON.stringify(provas));
+            carregarProvas();  // Carregar novamente as provas para refletir a atualização
+        }
+    
+        function removerProva(index) {
+            const provas = JSON.parse(localStorage.getItem("provas_" + usuarioAtual));
+            provas.splice(index, 1);
+            localStorage.setItem("provas_" + usuarioAtual, JSON.stringify(provas));
+            carregarProvas();  // Carregar as provas novamente após remoção
+        }
+    
+        function calcularMedia(prova) {
+            const notas = [parseFloat(prova.nota1) || 0, parseFloat(prova.nota2) || 0, parseFloat(prova.nota3) || 0];
+            const media = notas.reduce((a, b) => a + b, 0) / 3;
+            return media.toFixed(2);
+        }
+    
+        function calcularNotaFinal() {
+            const provas = JSON.parse(localStorage.getItem("provas_" + usuarioAtual)) || [];
+            const total = provas.reduce((acc, prova) => acc + parseFloat(calcularMedia(prova)), 0);
+            const mediaFinal = total / provas.length || 0;
+            document.getElementById("notaFinal").innerText = "Nota Final: " + mediaFinal.toFixed(2);
+        }
+    
+        function mostrarMelhorPior() {
+            const provasJoao = JSON.parse(localStorage.getItem("provas_jp")) || [];
+            const provasEduarda = JSON.parse(localStorage.getItem("provas_duda")) || [];
+            const melhorPiorTabela = document.getElementById("melhorPiorTabela");
+    
+            const melhorPiorJoao = obterMelhorPior(provasJoao);
+            const melhorPiorEduarda = obterMelhorPior(provasEduarda);
+    
+            melhorPiorTabela.innerHTML = `
+                <tr>
+                    <td>Jp</td>
+                    <td>${melhorPiorJoao.melhor} (${melhorPiorJoao.mediaMelhor.toFixed(2)})</td>
+                    <td>${melhorPiorJoao.pior} (${melhorPiorJoao.mediaPior.toFixed(2)})</td>
+                </tr>
+                <tr>
+                    <td>Duda</td>
+                    <td>${melhorPiorEduarda.melhor} (${melhorPiorEduarda.mediaMelhor.toFixed(2)})</td>
+                    <td>${melhorPiorEduarda.pior} (${melhorPiorEduarda.mediaPior.toFixed(2)})</td>
+                </tr>`;
+        }
+    
+        function obterMelhorPior(provas) {
+            let melhorMateria = '';
+            let piorMateria = '';
+            let melhorNota = -1;
+            let piorNota = 11;
+            let mediaMelhor = 0;
+            let mediaPior = 0;
+    
+            provas.forEach(prova => {
+                const media = parseFloat(calcularMedia(prova));
+                if (media > melhorNota) {
+                    melhorNota = media;
+                    melhorMateria = prova.materia;
+                    mediaMelhor = media;
+                }
+                if (media < piorNota) {
+                    piorNota = media;
+                    piorMateria = prova.materia;
+                    mediaPior = media;
+                }
+            });
+    
+            return {
+                melhor: melhorMateria,
+                pior: piorMateria,
+                mediaMelhor,
+                mediaPior
+            };
+        }
+    </script>
+</body>
+</html>
